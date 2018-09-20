@@ -69,7 +69,6 @@ type getUIDResult struct {
 	Address     string `json:"address,omitempty"`
 }
 
-
 type refreshResult struct {
 	Token   string `json:"token,omitempty"`
 	Refresh string `json:"refresh,omitempty"`

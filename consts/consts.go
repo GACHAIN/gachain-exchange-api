@@ -47,7 +47,6 @@ const BlockSize = 16
 // HashSize is size of hash
 const HashSize = 32
 
-
 const (
 	TxTypeFirstBlock  = 1
 	TxTypeStopNetwork = 2

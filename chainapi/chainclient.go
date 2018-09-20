@@ -44,8 +44,7 @@ var (
 	gAddress          string
 	gPrivate, gPublic string
 	gMobile           bool
-	ApiAddress 			string
-
+	ApiAddress        string
 )
 
 type global struct {
@@ -97,7 +96,6 @@ func sendRawRequest(rtype, url string, form *url.Values) ([]byte, error) {
 		return nil, fmt.Errorf(`%d %s`, resp.StatusCode, strings.TrimSpace(string(data)))
 	}
 
-
 	return data, nil
 }
 
@@ -136,9 +134,9 @@ func keyLogin(state int64) (err error) {
 		return
 	}
 	gAuth = ret.Token
-	
+
 	if len(ret.UID) == 0 {
-		
+
 		return fmt.Errorf(`getuid has returned empty uid`)
 	}
 
@@ -338,7 +336,6 @@ func KeyLogin(from string, state int64) (err error) {
 	return
 }
 
-
 func PostTxResult(txname string, form *url.Values) (id int64, msg string, err error) {
 	ret := make(map[string]interface{})
 	err = sendPost(`prepareSign/`+txname, form, &ret)
@@ -346,7 +343,7 @@ func PostTxResult(txname string, form *url.Values) (id int64, msg string, err er
 	if err != nil {
 		return
 	}
-    //mo
+	//mo
 	//form = &url.Values{}
 	if err = appendSign(ret, form); err != nil {
 		return
@@ -376,7 +373,6 @@ func PostTxResult(txname string, form *url.Values) (id int64, msg string, err er
 		err = nil
 	}
 
-
 	return
 }
 
@@ -384,7 +380,6 @@ func PostTx(txname string, form *url.Values) error {
 	_, _, err := postTxResult(txname, form)
 	return err
 }
-
 
 func SendGet(url string, form *url.Values, v interface{}) error {
 	return sendRequest("GET", url, form, v)
@@ -415,39 +410,38 @@ func WaitTx(hash string) (int64, error) {
 	return 0, fmt.Errorf(`TxStatus timeout`)
 }
 
-
 func GetUID() {
 	var ret getUIDResult
 	err := sendGet(`getuid`, nil, &ret)
 	if err != nil {
 		var v map[string]string
 		json.Unmarshal([]byte(err.Error()[4:]), &v)
-		fmt.Println("getuid Error: ", err)   
+		fmt.Println("getuid Error: ", err)
 		return
 	}
 	gAuth = ret.Token
 	priv, pub, err := crypto.GenHexKeys()
 	if err != nil {
-		fmt.Println("crypto.GenHexKeys Error: ", err)   
+		fmt.Println("crypto.GenHexKeys Error: ", err)
 		return
 	}
 	sign, err := crypto.Sign(priv, ret.UID)
 	if err != nil {
-		fmt.Println("crypto.Sign Error: ", err)   
+		fmt.Println("crypto.Sign Error: ", err)
 		return
 	}
 	form := url.Values{"pubkey": {pub}, "signature": {hex.EncodeToString(sign)}}
 	var lret loginResult
 	err = sendPost(`login`, &form, &lret)
 	if err != nil {
-		fmt.Println("login Error: ", err)   
+		fmt.Println("login Error: ", err)
 		return
 	}
 	gAuth = lret.Token
 	var ref refreshResult
 	err = sendPost(`refresh`, &url.Values{"token": {lret.Refresh}}, &ref)
 	if err != nil {
-		fmt.Println("refresh Error: ", err)   
+		fmt.Println("refresh Error: ", err)
 		return
 	}
 	gAuth = ref.Token
