@@ -32,8 +32,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/GACHAIN/chainclient/consts"
-	"github.com/GACHAIN/chainclient/converter"
+	"github.com/GACHAIN/gac-transfer/consts"
+	"github.com/GACHAIN/gac-transfer/converter"
 )
 
 // Address gets int64 EGGAS address from the public key

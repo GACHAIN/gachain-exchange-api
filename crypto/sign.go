@@ -31,8 +31,8 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/GACHAIN/chainclient/consts"
-	"github.com/GACHAIN/chainclient/converter"
+	"github.com/GACHAIN/gac-transfer/consts"
+	"github.com/GACHAIN/gac-transfer/converter"
 
 	log "github.com/sirupsen/logrus"
 )

@@ -112,3 +112,12 @@ const TxRequestExpire = 1 * time.Minute
 
 // DefaultTempDirName is default name of temporary directory
 const DefaultTempDirName = "gachain-temp"
+
+// ROUND_FIX is rounding constant
+const ROUND_FIX = 0.00000000001
+
+// GAC_DIGIT money_digit for GAC 1000000000000
+const GAC_DIGIT = 12
+
+// PrivkeyLength is privkey length
+const PrivkeyLength = 32

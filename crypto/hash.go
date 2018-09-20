@@ -28,7 +28,7 @@ import (
 	"encoding/hex"
 	"hash"
 
-	"github.com/GACHAIN/chainclient/consts"
+	"github.com/GACHAIN/gac-transfer/consts"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/sha3"
 )
