@@ -1,2 +1,2 @@
-./gac-transfer send -ip "http://127.0.0.1:7079" -prikey "./key" -to "1341-7138-3444-6302-0031" -amount "1312312" -comment "第一次转账"
+./gac-transfer-mac send -ip "https://hb.gac.one:7079" -prikey "./key" -to "0518-3582-0586-7552-9865" -amount "1312312" -comment "1"
 

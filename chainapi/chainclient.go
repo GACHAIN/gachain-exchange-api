@@ -336,7 +336,7 @@ func KeyLogin(from string, state int64) (err error) {
 	return
 }
 
-func PostTxResult(txname string, form *url.Values) (id int64, msg string, err error) {
+func PostTxResult(txname string, form *url.Values) (id int64, txHash string, msg string, err error) {
 	ret := make(map[string]interface{})
 	err = sendPost(`prepareSign/`+txname, form, &ret)
 
@@ -365,7 +365,7 @@ func PostTxResult(txname string, form *url.Values) (id int64, msg string, err er
 	if len((*form)[`nowait`]) > 0 {
 		return
 	}
-
+	txHash = ret[`hash`].(string)
 	id, err = waitTx(ret[`hash`].(string))
 	fmt.Println(ret[`hash`].(string))
 
