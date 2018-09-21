@@ -65,7 +65,7 @@ func PrivateToPublic(key []byte) ([]byte, error) {
 	return append(converter.FillLeft(priv.PublicKey.X.Bytes()), converter.FillLeft(priv.PublicKey.Y.Bytes())...), nil
 }
 
-// KeyToAddress converts a public key to gachain address XXXX-...-XXXX.
+// KeyToAddress converts a public key to gachain  XXXX-...-XXXzX.
 func KeyToAddress(pubKey []byte) string {
 	return converter.AddressToString(Address(pubKey))
 }

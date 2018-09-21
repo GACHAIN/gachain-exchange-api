@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"encoding/hex"
+	"encoding/json"
 	api "github.com/GACHAIN/gac-transfer/chainapi"
 	"github.com/GACHAIN/gac-transfer/crypto"
 	"github.com/shopspring/decimal"
@@ -38,6 +39,21 @@ type WalletHistory struct {
 	Money        string
 }
 
+type WalletHistoryTmp struct {
+	tableName    string
+	ID           int64
+	SenderID     int64
+	SenderAdd    string
+	RecipientID  int64
+	RecipientAdd string
+	Amount       decimal.Decimal
+	Comment      string
+	BlockID      int64
+	TxHash       string
+	CreatedAt    time.Time
+	Money        string
+}
+
 type myBalanceResult struct {
 	Amount string `json:"amount"`
 	Money  string `json:"money"`
@@ -49,7 +65,8 @@ func printUsage() {
 	fmt.Println("Usage:")
 	fmt.Println("\tsend -ip IP -prikey PRIKEY -to TO -amount AMOUNT -comment COMMENT --发起交易 ")
 	fmt.Println("\tgetBalance -ip IP -prikey PRIKEY -ecosystem ECOSYSTEMID  --查询余额")
-	fmt.Println("\tgetHistory -ip IP -prikey PRIKEY -limit LIMIT -page PAGE -searchType SEARCHTYPE  - --查询交易历史")
+	fmt.Println("\tgetHistory -ip IP -prikey PRIKEY -limit LIMIT -page PAGE -searchType SEARCHTYPE  --查询交易历史")
+	fmt.Println("\tgetAddress -prikey PRIKEY --查询地址")
 }
 
 func Exit(n int) {
@@ -67,26 +84,28 @@ func (cli *CLI) Run() {
 	flagTo := sendGac.String("to", "", "转账目的地址")
 	lagAmount := sendGac.String("amount", "", "转账金额")
 	comment := sendGac.String("comment", "", "转账备注")
-
 	// 查询余额
 	getBalancecmd := flag.NewFlagSet("getBalance", flag.ExitOnError)
 	getBalanceByIp := getBalancecmd.String("ip", "", "节点IP地址")
 	getBalanceByPrikey := getBalancecmd.String("prikey", "", "查询者私钥")
 	getBalanceByEcosystem := getBalancecmd.String("ecosystem", "1", "生态系统ID")
-
 	// 查询历史
 	getHistorycmd := flag.NewFlagSet("getHistory", flag.ExitOnError)
 	getHistoryByIp := getHistorycmd.String("ip", "", "节点IP地址")
 	getHistoryByPrikey := getHistorycmd.String("prikey", "", "私钥")
-	limit := getHistorycmd.String("limit", "", "查询条数")
-	page := getHistorycmd.String("page", "", "查询分页")
-	searchType := getHistorycmd.String("searchType", "", "查询历史类型")
+	limit := getHistorycmd.String("limit", "20", "查询条数")
+	page := getHistorycmd.String("page", "1", "查询分页")
+	searchType := getHistorycmd.String("searchType", "income", "查询历史类型")
+	// 获取地址
+	getAddresscmd := flag.NewFlagSet("getAddress", flag.ExitOnError)
+	getAddressByPrikey := getAddresscmd.String("prikey", "", "私钥")
 
 	switch os.Args[1] {
 	case "send":
 		err := sendGac.Parse(os.Args[2:])
 		if err != nil {
 			fmt.Println(err)
+			return
 		}
 
 	case "getBalance":
@@ -99,6 +118,16 @@ func (cli *CLI) Run() {
 		if err != nil {
 			fmt.Println(err)
 		}
+	case "getAddress":
+		err := getAddresscmd.Parse(os.Args[2:])
+		if err != nil {
+			fmt.Println(err)
+		}
+	//case "getAddress":
+	//	err := getAddresscmd.Parsed(os.Args[2:])
+	//	if err != nil {
+	//		fmt.Println(err)
+	//	}
 	default:
 		Exit(1)
 	}
@@ -122,7 +151,7 @@ func (cli *CLI) Run() {
 			fmt.Println("查询余额参数输入错误，请严格按照提示信息输入！")
 			Exit(1)
 		} else {
-			ip, prikey, ecosystem  := *getBalanceByIp, *getBalanceByPrikey, *getBalanceByEcosystem
+			ip, prikey, ecosystem := *getBalanceByIp, *getBalanceByPrikey, *getBalanceByEcosystem
 			cli.GetBalance(ip, prikey, ecosystem)
 		}
 	}
@@ -134,6 +163,16 @@ func (cli *CLI) Run() {
 		} else {
 			ip, prikey, limit, page, searchType := *getHistoryByIp, *getHistoryByPrikey, *limit, *page, *searchType
 			cli.GetHistory(ip, prikey, limit, page, searchType)
+		}
+	}
+
+	if getAddresscmd.Parsed() {
+		if *getAddressByPrikey == "" {
+			fmt.Println("获取公钥失败！")
+			Exit(1)
+		}else{
+			prikey := *getAddressByPrikey
+			cli.GetAddress(prikey)
 		}
 	}
 }
@@ -156,7 +195,6 @@ func (cli *CLI) Send(ip string, prikey string, to string, amount string, comment
 	pub, err = api.PrivateToPublicHex(string(key))
 	transferData :=
 		"Comment:" + comment + ",Gac:" + amount + ",Recipient:" + to + ",payover:0,pubkey:" + pub
-
 	sign, err = crypto.Sign(string(key), transferData)
 	if err != nil {
 		return
@@ -166,7 +204,6 @@ func (cli *CLI) Send(ip string, prikey string, to string, amount string, comment
 	if err != nil {
 		return
 	}
-
 	params := &url.Values{
 		`Comment`:   {comment},
 		`Gac`:       {amount},
@@ -189,9 +226,10 @@ func (cli *CLI) Send(ip string, prikey string, to string, amount string, comment
 
 // 查询余额
 func (cli *CLI) GetBalance(ip string, prikey string, ecosystem string) {
-	var balanceresult myBalanceResult
+	var (
+		balanceresult myBalanceResult
+	)
 	api.ApiAddress = ip
-	// 1. 登陆
 	if api.KeyLogin(prikey, 1); err != nil {
 		fmt.Println("error:", err)
 		return
@@ -204,24 +242,26 @@ func (cli *CLI) GetBalance(ip string, prikey string, ecosystem string) {
 	if len(key) > 64 {
 		key = key[:64]
 	}
-	params := &url.Values{
-		"ecosystem":      {`1`},
-	}
-	err = api.SendGet("myBalance", params, &balanceresult)
+	err = api.SendGet("myBalance?ecosystem="+ecosystem, &url.Values{}, &balanceresult)
 	if err != nil {
 		fmt.Println("Error: ", err)
 		return
 	}
-	fmt.Println("balanceresult: ", balanceresult)
+	jsonFormat, err := json.MarshalIndent(balanceresult, "", "	")
+	if err != nil {
+		fmt.Println("error:", err)
+		return
+	}
+	fmt.Println(string(jsonFormat))
 }
 
 // 查询历史
 func (cli *CLI) GetHistory(ip string, prikey string, limit string, page string, searchType string) {
 	var (
 		walletHistories []WalletHistory
+		walletHistoriesTmp []WalletHistoryTmp
 	)
 	api.ApiAddress = ip
-	// 1. 登陆
 	if api.KeyLogin(prikey, 1); err != nil {
 		fmt.Println("error:", err)
 		return
@@ -234,17 +274,54 @@ func (cli *CLI) GetHistory(ip string, prikey string, limit string, page string, 
 	if len(key) > 64 {
 		key = key[:64]
 	}
-	params := &url.Values{
-		"limit":      {limit},
-		"page":       {page},
-		`searchType`: {searchType},
-	}
-	err = api.SendGet("walletHistory", params, &walletHistories)
+
+	urlValue := "walletHistory?limit="+limit+"&page="+page+"&searchType="+searchType
+
+	err = api.SendGet(urlValue, &url.Values{}, &walletHistories)
 	if err != nil {
 		fmt.Println("Error: ", err)
 		return
 	}
-	fmt.Println("historyResult: ", walletHistories)
+
+	for i := 0;  i < len(walletHistories); i++  {
+		var tmp  WalletHistoryTmp
+		tmp.Amount = walletHistories[i].Amount
+		tmp.Money = walletHistories[i].Money
+		tmp.BlockID = walletHistories[i].BlockID
+		tmp.SenderID = walletHistories[i].SenderID
+		tmp.RecipientID = walletHistories[i].RecipientID
+		tmp.TxHash = hex.EncodeToString(walletHistories[i].TxHash)
+		tmp.Comment = walletHistories[i].Comment
+		tmp.CreatedAt = walletHistories[i].CreatedAt
+		tmp.ID = walletHistories[i].ID
+		tmp.SenderAdd = walletHistories[i].SenderAdd
+		tmp.RecipientAdd = walletHistories[i].RecipientAdd
+		walletHistoriesTmp = append(walletHistoriesTmp, tmp)
+	}
+
+	jsonFormat, err := json.MarshalIndent(walletHistoriesTmp, "", "	")
+	if err != nil {
+		fmt.Println("error:", err)
+		return
+	}
+	fmt.Println(string(jsonFormat))
+}
+
+func (cli CLI) GetAddress(prikey string) {
+	//key, err = ioutil.ReadFile(prikey)
+	//if err != nil {
+	//	fmt.Println("error:", err)
+	//	return
+	//}
+	//var pub interface{}
+	//pub, err := api.PrivateToPublicHex(string(key))
+	//if err != nil {
+	//	fmt.Println(err)
+	//	return
+	//}
+	//fmt.Println("pubkey:", pub)
+	//
+	//fmt.Println(crypto.KeyToAddress(pub.([]byte)))
 }
 
 // 参数错误校验

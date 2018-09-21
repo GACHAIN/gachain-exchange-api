@@ -276,3 +276,4 @@ func getSharedKey(private, public []byte) (shared []byte, err error) {
 
 	return
 }
+
