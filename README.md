@@ -17,7 +17,7 @@
 > 1. Delete unnecessary packages in govendor
 
 ### 1. Build binary
-`go build`
+[Reference resources](https://github.com/mitchellh/gox) 
 
 #### Execute test script
 ```
