@@ -65,13 +65,13 @@
 
 
 
-#### Query history
+#### Query history
 
     ./gac-transfer getHistory -ip "http://127.0.0.1:7079" -prikey "./key" -limit "5" -page "1" -searchType "income"
 
     getHistory : indicates the command to query the transaction history
 
-    -ip : Primary node? IP address and port number
+    -ip : Primary node? IP address and port number
     -prikey : User private key (private key? storage path)
     [-limit] : Number of queries (default: 20)
     [-page] :  Query the first page (default: 1)
