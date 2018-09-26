@@ -64,7 +64,7 @@ type CLI struct{}
 
 func printUsage() {
 	fmt.Println("Usage:")
-	fmt.Println("\tsend -ip IP -prikey PRIKEY -to TO -amount AMOUNT -comment COMMENT --发起交易 ")
+	fmt.Println("\tsend -ip IP -prikey PRIKEY -to TO -amount AMOUNT -payover PAYOVER -comment COMMENT --发起交易 ")
 	fmt.Println("\tgetBalance -ip IP -prikey PRIKEY -ecosystem ECOSYSTEMID  --查询余额")
 	fmt.Println("\tgetHistory -ip IP -prikey PRIKEY -limit LIMIT -page PAGE -searchType SEARCHTYPE  --查询交易历史")
 	fmt.Println("\tgetAddress -prikey PRIKEY --查询地址")
@@ -85,6 +85,7 @@ func (cli *CLI) Run() {
 	sendGacByPrikey := sendGac.String("prikey", "", "发送者私钥")
 	flagTo := sendGac.String("to", "", "转账目的地址")
 	lagAmount := sendGac.String("amount", "", "转账金额")
+	lagPayover := sendGac.String("payover", "0", "加急费")
 	comment := sendGac.String("comment", "", "转账备注")
 	// 查询余额
 	getBalancecmd := flag.NewFlagSet("getBalance", flag.ExitOnError)
@@ -142,9 +143,9 @@ func (cli *CLI) Run() {
 			Exit(1)
 		} else {
 			// 接收参数
-			ip, prikey, to, amount, comment := *sendGacbyIp, *sendGacByPrikey, *flagTo, *lagAmount, *comment
+			ip, prikey, to, amount, payover, comment := *sendGacbyIp, *sendGacByPrikey, *flagTo, *lagAmount, *lagPayover, *comment
 			// 发送参数执行转账
-			cli.Send(ip, prikey, to, amount, comment)
+			cli.Send(ip, prikey, to, amount, payover, comment)
 		}
 	}
 
@@ -184,7 +185,9 @@ func (cli *CLI) Run() {
 	}
 }
 
-func (cli *CLI) Send(ip string, prikey string, to string, amount string, comment string) {
+func (cli *CLI) Send(ip string, prikey string, to string, amount string, payover string, comment string) {
+
+	fmt.Println(payover)
 	api.ApiAddress = ip
 	if api.KeyLogin(prikey, 1); err != nil {
 		fmt.Println("error", err)
@@ -201,7 +204,7 @@ func (cli *CLI) Send(ip string, prikey string, to string, amount string, comment
 
 	pub, err = api.PrivateToPublicHex(string(key))
 	transferData :=
-		"Comment:" + comment + ",Gac:" + amount + ",Recipient:" + to + ",payover:0,pubkey:" + pub
+		"Comment:" + comment + ",Gac:" + amount + ",Recipient:" + to + ",payover:"+ payover +",pubkey:" + pub
 	sign, err = crypto.Sign(string(key), transferData)
 	if err != nil {
 		return
@@ -215,7 +218,7 @@ func (cli *CLI) Send(ip string, prikey string, to string, amount string, comment
 		`Comment`:   {comment},
 		`Gac`:       {amount},
 		`Recipient`: {to},
-		`payover`:   {`0`},
+		`payover`:   {payover},
 		`pubkey`:    {pub},
 		`gacsign`:   {mysign},
 	}
@@ -223,7 +226,7 @@ func (cli *CLI) Send(ip string, prikey string, to string, amount string, comment
 	if err != nil {
 		data := map[string]interface{}{
 			"block_id": blockId,
-			"errmsg":   err,
+			"errmsg":   err.Error(),
 			"code":     0,
 		}
 		jsonFormat, err := json.MarshalIndent(data, "", "	")
