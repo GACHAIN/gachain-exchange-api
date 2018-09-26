@@ -16,6 +16,10 @@
 ##### Time: 2018-9-25:
 > 1. Delete unnecessary packages in govendor
 
+
+##### Time: 2018-9-26:
+> 1. Add transfer to increase expedited fee
+
 ### 1. Build binary
 [Reference resources](https://github.com/mitchellh/gox) 
 
@@ -40,6 +44,7 @@
     -prikey : User private key (private key? storage path)
     -to : Recipient wallet address
     -amout : Transfer balance
+    [-payover]: Transfer expedited fee (do not set expedited fee is 0)
     -comment : Transfer note
 
 ##### Result：
