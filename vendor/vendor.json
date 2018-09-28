@@ -39,6 +39,12 @@
 			"revisionTime": "2018-08-24T00:43:55Z"
 		},
 		{
+			"checksumSHA1": "UWzn2AuQZ7Vb09ljbxz8BHv47S8=",
+			"path": "github.com/konsorten/go-windows-terminal-sequences",
+			"revision": "b729f2633dfe35f4d1d8a32385f6685610ce1cb5",
+			"revisionTime": "2018-04-02T22:36:58Z"
+		},
+		{
 			"checksumSHA1": "qpSkbUIEjOt+viHYTTm85FKK6ng=",
 			"path": "github.com/mitchellh/gox",
 			"revision": "51ed453898ca5579fea9ad1f08dff6b121d9f2e8",
