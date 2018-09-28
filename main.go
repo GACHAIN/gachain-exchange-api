@@ -35,11 +35,12 @@ type WalletHistory struct {
 	Amount       decimal.Decimal
 	Comment      string
 	BlockID      int64
-	TxHash       []byte
+	//TxHash       []byte
+	TxHash       string
 	CreatedAt    time.Time
 	Money        string
 }
-
+/*
 type WalletHistoryTmp struct {
 	tableName    string
 	ID           int64
@@ -53,7 +54,7 @@ type WalletHistoryTmp struct {
 	TxHash       string
 	CreatedAt    time.Time
 	Money        string
-}
+}*/
 
 type myBalanceResult struct {
 	Amount string `json:"amount"`
@@ -287,7 +288,7 @@ func (cli *CLI) GetBalance(ip string, prikey string, ecosystem string) {
 func (cli *CLI) GetHistory(ip string, prikey string, limit string, page string, searchType string) {
 	var (
 		walletHistories    []WalletHistory
-		walletHistoriesTmp []WalletHistoryTmp
+		//walletHistoriesTmp []WalletHistoryTmp
 	)
 	api.ApiAddress = ip
 	if api.KeyLogin(prikey, 1); err != nil {
@@ -310,7 +311,7 @@ func (cli *CLI) GetHistory(ip string, prikey string, limit string, page string, 
 		fmt.Println("Error: ", err)
 		return
 	}
-
+    /*
 	for i := 0; i < len(walletHistories); i++ {
 		var tmp WalletHistoryTmp
 		tmp.Amount = walletHistories[i].Amount
@@ -325,9 +326,10 @@ func (cli *CLI) GetHistory(ip string, prikey string, limit string, page string, 
 		tmp.SenderAdd = walletHistories[i].SenderAdd
 		tmp.RecipientAdd = walletHistories[i].RecipientAdd
 		walletHistoriesTmp = append(walletHistoriesTmp, tmp)
-	}
+	}*/
 
-	jsonFormat, err := json.MarshalIndent(walletHistoriesTmp, "", "	")
+	//jsonFormat, err := json.MarshalIndent(walletHistoriesTmp, "", "	")
+	jsonFormat, err := json.MarshalIndent(walletHistories, "", "	")
 	if err != nil {
 		fmt.Println("error:", err)
 		return
