@@ -188,7 +188,7 @@ func (cli *CLI) Run() {
 
 func (cli *CLI) Send(ip string, prikey string, to string, amount string, payover string, comment string) {
 
-	fmt.Println(payover)
+	//fmt.Println(payover)
 	api.ApiAddress = ip
 	if api.KeyLogin(prikey, 1); err != nil {
 		fmt.Println("error", err)

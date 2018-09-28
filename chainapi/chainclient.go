@@ -367,11 +367,11 @@ func PostTxResult(txname string, form *url.Values) (id int64, txHash string, msg
 	}
 	txHash = ret[`hash`].(string)
 	id, err = waitTx(ret[`hash`].(string))
-	fmt.Println(ret[`hash`].(string))
+	//fmt.Println(ret[`hash`].(string))
 
 	if id != 0 && err != nil {
 		msg = err.Error()
-		fmt.Println(msg)
+		//fmt.Println(msg)
 		err = nil
 	}
 
