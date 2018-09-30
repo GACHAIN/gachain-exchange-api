@@ -227,6 +227,7 @@ func (cli *CLI) Send(ip string, prikey string, to string, amount string, payover
 	if err != nil {
 		data := map[string]interface{}{
 			"block_id": blockId,
+			"txHash":   txHash,
 			"errmsg":   err.Error(),
 			"code":     0,
 		}
