@@ -34,9 +34,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/GACHAIN/gac-transfer/consts"
-	"github.com/GACHAIN/gac-transfer/converter"
-	"github.com/GACHAIN/gac-transfer/crypto"
+	"github.com/GACHAIN/gachain-exchange-api/consts"
+	"github.com/GACHAIN/gachain-exchange-api/converter"
+	"github.com/GACHAIN/gachain-exchange-api/crypto"
 )
 
 var (

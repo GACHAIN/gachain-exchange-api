@@ -7,8 +7,8 @@ import (
 
 	"encoding/hex"
 	"encoding/json"
-	api "github.com/GACHAIN/gac-transfer/chainapi"
-	"github.com/GACHAIN/gac-transfer/crypto"
+	api "github.com/GACHAIN/gachain-exchange-api/chainapi"
+	"github.com/GACHAIN/gachain-exchange-api/crypto"
 	"github.com/shopspring/decimal"
 	"io/ioutil"
 	"net/url"

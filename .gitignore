@@ -2,4 +2,4 @@
 .idea/
 gac*
 test*
-gac-transfer_*
+./gachain-exchange-api

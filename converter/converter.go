@@ -36,7 +36,7 @@ import (
 
 	"bytes"
 
-	"github.com/GACHAIN/gac-transfer/consts"
+	"github.com/GACHAIN/gachain-exchange-api/consts"
 	"github.com/shopspring/decimal"
 	log "github.com/sirupsen/logrus"
 )
