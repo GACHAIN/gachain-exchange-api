@@ -7,12 +7,15 @@ import (
 
 	"encoding/hex"
 	"encoding/json"
-	api "github.com/GACHAIN/gachain-exchange-api/chainapi"
-	"github.com/GACHAIN/gachain-exchange-api/crypto"
 	"github.com/shopspring/decimal"
 	"io/ioutil"
 	"net/url"
 	"time"
+
+	"github.com/GACHAIN/go-gachain/packages/crypto"
+	//"github.com/GACHAIN/go-gachain/packages/api"
+	"github.com/GACHAIN/go-gachain/packages/converter"
+	api "github.com/GACHAIN/go-gachain/packages/gacsdk"
 )
 
 var (
@@ -36,10 +39,11 @@ type WalletHistory struct {
 	Comment      string
 	BlockID      int64
 	//TxHash       []byte
-	TxHash       string
-	CreatedAt    time.Time
-	Money        string
+	TxHash    string
+	CreatedAt time.Time
+	Money     string
 }
+
 /*
 type WalletHistoryTmp struct {
 	tableName    string
@@ -190,12 +194,13 @@ func (cli *CLI) Send(ip string, prikey string, to string, amount string, payover
 
 	//fmt.Println(payover)
 	api.ApiAddress = ip
-	if api.KeyLogin(prikey, 1); err != nil {
+	api.ApiEcosystemID = 1
+	if err = api.KeyLogin(prikey, api.ApiEcosystemID); err != nil {
 		fmt.Println("error", err)
 		return
 	}
 
-	key, err = ioutil.ReadFile(prikey)
+	/*key, err = ioutil.ReadFile(prikey)
 	if err != nil {
 		return
 	}
@@ -206,7 +211,7 @@ func (cli *CLI) Send(ip string, prikey string, to string, amount string, payover
 	pub, err = api.PrivateToPublicHex(string(key))
 	transferData :=
 		"Comment:" + comment + ",Gac:" + amount + ",Recipient:" + to + ",payover:"+ payover +",pubkey:" + pub
-	sign, err = crypto.Sign(string(key), transferData)
+	sign, err = crypto.SignString(string(key), transferData)
 	if err != nil {
 		return
 	}
@@ -214,14 +219,16 @@ func (cli *CLI) Send(ip string, prikey string, to string, amount string, payover
 	pub, err = api.PrivateToPublicHex(string(key))
 	if err != nil {
 		return
-	}
+	}*/
+	money := converter.StrToInt64(amount) * 1000000000000
+
 	params := &url.Values{
 		`Comment`:   {comment},
-		`Gac`:       {amount},
+		`Gac`:       {converter.Int64ToStr(money)},
 		`Recipient`: {to},
 		`payover`:   {payover},
 		`pubkey`:    {pub},
-		`gacsign`:   {mysign},
+		//`gacsign`:   {mysign},
 	}
 	blockId, txHash, result, err = api.PostTxResult(`GachainMoneyTransfer`, params)
 	if err != nil {
@@ -260,7 +267,8 @@ func (cli *CLI) GetBalance(ip string, prikey string, ecosystem string) {
 		balanceresult myBalanceResult
 	)
 	api.ApiAddress = ip
-	if api.KeyLogin(prikey, 1); err != nil {
+	api.ApiEcosystemID = 1
+	if err = api.KeyLogin(prikey, api.ApiEcosystemID); err != nil {
 		fmt.Println("error:", err)
 		return
 	}
@@ -288,11 +296,12 @@ func (cli *CLI) GetBalance(ip string, prikey string, ecosystem string) {
 // 查询历史
 func (cli *CLI) GetHistory(ip string, prikey string, limit string, page string, searchType string) {
 	var (
-		walletHistories    []WalletHistory
+		walletHistories []WalletHistory
 		//walletHistoriesTmp []WalletHistoryTmp
 	)
 	api.ApiAddress = ip
-	if api.KeyLogin(prikey, 1); err != nil {
+	api.ApiEcosystemID = 1
+	if err = api.KeyLogin(prikey, api.ApiEcosystemID); err != nil {
 		fmt.Println("error:", err)
 		return
 	}
@@ -312,22 +321,22 @@ func (cli *CLI) GetHistory(ip string, prikey string, limit string, page string, 
 		fmt.Println("Error: ", err)
 		return
 	}
-    /*
-	for i := 0; i < len(walletHistories); i++ {
-		var tmp WalletHistoryTmp
-		tmp.Amount = walletHistories[i].Amount
-		tmp.Money = walletHistories[i].Money
-		tmp.BlockID = walletHistories[i].BlockID
-		tmp.SenderID = walletHistories[i].SenderID
-		tmp.RecipientID = walletHistories[i].RecipientID
-		tmp.TxHash = hex.EncodeToString(walletHistories[i].TxHash)
-		tmp.Comment = walletHistories[i].Comment
-		tmp.CreatedAt = walletHistories[i].CreatedAt
-		tmp.ID = walletHistories[i].ID
-		tmp.SenderAdd = walletHistories[i].SenderAdd
-		tmp.RecipientAdd = walletHistories[i].RecipientAdd
-		walletHistoriesTmp = append(walletHistoriesTmp, tmp)
-	}*/
+	/*
+		for i := 0; i < len(walletHistories); i++ {
+			var tmp WalletHistoryTmp
+			tmp.Amount = walletHistories[i].Amount
+			tmp.Money = walletHistories[i].Money
+			tmp.BlockID = walletHistories[i].BlockID
+			tmp.SenderID = walletHistories[i].SenderID
+			tmp.RecipientID = walletHistories[i].RecipientID
+			tmp.TxHash = hex.EncodeToString(walletHistories[i].TxHash)
+			tmp.Comment = walletHistories[i].Comment
+			tmp.CreatedAt = walletHistories[i].CreatedAt
+			tmp.ID = walletHistories[i].ID
+			tmp.SenderAdd = walletHistories[i].SenderAdd
+			tmp.RecipientAdd = walletHistories[i].RecipientAdd
+			walletHistoriesTmp = append(walletHistoriesTmp, tmp)
+		}*/
 
 	//jsonFormat, err := json.MarshalIndent(walletHistoriesTmp, "", "	")
 	jsonFormat, err := json.MarshalIndent(walletHistories, "", "	")

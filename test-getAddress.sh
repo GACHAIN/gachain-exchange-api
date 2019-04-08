@@ -1,1 +1,1 @@
-./gac-transfer getAddress -prikey "./key"
+./exchangetool.exe getAddress -prikey "./key"
